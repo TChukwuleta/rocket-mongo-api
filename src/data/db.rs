@@ -1,5 +1,5 @@
+use mongodb::bson::oid::ObjectId;
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 use chrono::{DateTime, Utc};
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
@@ -14,16 +14,22 @@ pub struct  RequestUser {
     pub password: String
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ChangePassword {
+    pub new_password: String,
+    pub id: ObjectId
+}
+
 // User response model
 pub struct  ResponseUser {
-    pub id: String,
+    pub id: ObjectId,
     pub name: String,
     pub email: String
 }
 
 impl ResponseUser {
     pub fn from_user(user: &User) -> Self {
-        ResponseUser { id: user.id.to_string(), name: format!("{}", user.name), email: format!("{}", user.email) }
+        ResponseUser { id: user.id.unwrap(), name: format!("{}", user.name), email: format!("{}", user.email) }
     }
 }
 
@@ -37,8 +43,8 @@ pub struct UserPassword{
 // User model
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct User{
-    #[serde(rename = "_id")]
-    pub id: Uuid,
+    #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
+    pub id: Option<ObjectId>,
     pub name: String,
     pub email: String,
     pub hashed_password: String,
@@ -52,8 +58,7 @@ impl User {
         let salt: String = thread_rng().sample_iter(Alphanumeric)
         .take(20).map(char::from).collect();
         let hashed_password = User::hash_password(&password, &salt);
-
-        User { id: Uuid::new_v4(), name, email, hashed_password, salt, created: Utc::now(), updated: Utc::now() }
+        User { id: None, name, email, hashed_password, salt, created: Utc::now(), updated: Utc::now() }
     }
 
     pub fn from_insertable(insertable: RequestUser) -> Self {

@@ -1,15 +1,13 @@
-use std::{ops::Deref, env};
+use std::env;
 use dotenv::dotenv;
-use rocket::{http, request::{self, FromRequest}};
-use rocket::{Request, State};
 use chrono::Utc;
 use mongodb::{
-    bson::{extjson::de::Error, oid::ObjectId, DateTime, doc},
+    bson::{extjson::de::Error, oid::ObjectId, doc, DateTime},
     results::{InsertOneResult, DeleteResult, UpdateResult},
     sync::{Client, Collection}
 };
 
-use crate::data::db::{User, RequestUser};
+use crate::data::db::User;
 
 pub struct MongoConnection{
     col: Collection<User>
@@ -62,7 +60,7 @@ impl MongoConnection {
         Ok(user)
     }
 
-    pub fn update_user(&self, id: &String, user_details: RequestUser) -> Result<UpdateResult, Error> {
+    pub fn update_user(&self, id: &String, user_details: User) -> Result<UpdateResult, Error> {
         let obj_id = ObjectId::parse_str(id).unwrap();
         let filter = doc! {"_id": obj_id};
         let new_doc = doc! {
@@ -70,7 +68,8 @@ impl MongoConnection {
                 "id": obj_id,
                 "name": user_details.name,
                 "email": user_details.email,
-                "hashed_password": user_details.password
+                "hashed_password": user_details.hashed_password,
+                "updated": DateTime::now()
             }
         };
         let updated_user = self.col.update_one(filter, new_doc, None).ok().expect("Error updating user information");

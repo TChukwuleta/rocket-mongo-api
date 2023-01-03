@@ -1731,6 +1731,7 @@ dependencies = [
  "rocket",
  "rust-argon2",
  "serde",
+ "serde_json",
  "uuid 1.2.2",
 ]
 
