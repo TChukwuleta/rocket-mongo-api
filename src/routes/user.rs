@@ -41,6 +41,7 @@ pub fn users_list_rt(db: &State<MongoConnection>) -> Result<Json<Vec<User>>, Sta
     // }
     match users {
         Ok(users) =>{ 
+            println!("Taniii");
             //Ok(ApiResponse::ok_with_data("Data retrieval was successful", users))
             Ok(Json(users))
         },
@@ -52,7 +53,7 @@ pub fn users_list_rt(db: &State<MongoConnection>) -> Result<Json<Vec<User>>, Sta
     }
 }
 
-#[post("/users", data="<new_user>")]
+#[post("/createuser", data="<new_user>")]
 pub fn new_user_rt(db: &State<MongoConnection>, new_user: Json<RequestUser>) -> Result<Json<InsertOneResult>, Status> {
     let test = RequestUser{
         name: new_user.name.to_owned(),

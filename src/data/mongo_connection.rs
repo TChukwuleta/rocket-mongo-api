@@ -35,6 +35,7 @@ impl MongoConnection {
     pub fn get_user(&self, id: &String) -> Result<User, Error> {
         let obj_id = ObjectId::parse_str(id).unwrap();
         let filter = doc! {"_id": obj_id };
+        println!("Filter is: {:?}", filter);
         let user_detail = self.col.find_one(filter, None).ok().expect("Error retrieving user details");
         Ok(user_detail.unwrap())
     }
@@ -69,7 +70,7 @@ impl MongoConnection {
                 "name": user_details.name,
                 "email": user_details.email,
                 "hashed_password": user_details.hashed_password,
-                "updated": DateTime::now()
+                //"updated": user_details.updated
             }
         };
         let updated_user = self.col.update_one(filter, new_doc, None).ok().expect("Error updating user information");
